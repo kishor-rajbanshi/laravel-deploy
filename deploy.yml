@@ -1,0 +1,38 @@
+name: Deploy ({branch})
+
+run-name: Deploy ${{ github.ref_name }} by @${{ github.actor }}
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches: ["{branch}"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to ${{ vars.HOST }}
+
+    runs-on: ubuntu-latest
+
+    environment: "{branch}"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Connect and run deployment script on server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ vars.HOST }}
+          port: ${{ vars.PORT }}
+          username: ${{ vars.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: cd ${{ vars.BASE_PATH }}
+          script_path: deploy.sh
