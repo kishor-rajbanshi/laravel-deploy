@@ -46,7 +46,11 @@ curl -fsSL "$workflow_src?_=$(date +%s)" |
 curl -fsSL "$deploy_src?_=$(date +%s)" -o "$deploy_dest"
 
 echo ""
-echo "Configure the following in GitHub: Settings → Environments → $branch"
+echo "Create a GitHub environment named '$branch':"
+echo "  Repository → Settings → Environments → New environment"
+echo ""
+echo "Then add the following, either at the repository level (shared by all"
+echo "environments) or in the '$branch' environment (overrides the repository value):"
 echo ""
 echo "Secrets"
 echo "  SSH_KEY    : SSH private key (contents of id_ed25519)"
