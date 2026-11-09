@@ -1,5 +1,12 @@
 #!/bin/sh
 
+export NVM_DIR="$HOME/.nvm"
+# shellcheck source=/dev/null
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:${PNPM_HOME:-$HOME/.local/share/pnpm}:$HOME/.yarn/bin:$PATH"
+
 set -e
 
 php artisan down
@@ -7,25 +14,21 @@ php artisan down
 git fetch --prune
 git reset --hard '@{upstream}'
 
-export NVM_DIR="$HOME/.nvm"
-# shellcheck source=/dev/null
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-
 if [ -f package.json ]; then
-	if { [ -f bun.lock ] || [ -f bun.lockb ]; } && command -v bun >/dev/null 2>&1; then
+	if [ -f bun.lock ] || [ -f bun.lockb ]; then
 		bun install --frozen-lockfile
 		bun run build
-	elif [ -f pnpm-lock.yaml ] && command -v pnpm >/dev/null 2>&1; then
+	elif [ -f pnpm-lock.yaml ]; then
 		pnpm install --frozen-lockfile
 		pnpm run build
-	elif [ -f yarn.lock ] && command -v yarn >/dev/null 2>&1; then
+	elif [ -f yarn.lock ]; then
 		if [ "$(yarn --version | cut -d. -f1)" -ge 2 ]; then
 			yarn install --immutable
 		else
 			yarn install --frozen-lockfile
 		fi
 		yarn run build
-	elif command -v npm >/dev/null 2>&1; then
+	else
 		npm ci --no-audit --no-fund
 		npm run build
 	fi
